@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProjectsService, Project } from '@workshop/core-data';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-projects',
@@ -7,27 +8,47 @@ import { ProjectsService, Project } from '@workshop/core-data';
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-
-  projects: Project[];
+  primaryColor = 'red';
+  projects$;
   selectedProject: Project;
 
   constructor(private projectsService: ProjectsService) { }
 
   ngOnInit() {
     this.getProjects();
+    this.resetProject();
   }
 
   selectProject(project) {
     this.selectedProject = project;
   }
 
+  resetProject() {
+    const emptyProject: Project = {
+      id: null,
+      title: '',
+      details: '',
+      percentComplete: 0,
+      approved: false,
+    }
+    this.selectProject(emptyProject);
+  }
+
   getProjects() {
-    this.projectsService.all()
-    .subscribe((result: any) => this.projects = result);
+    this.projects$ = this.projectsService.all();
+  }
+
+  saveProject(project) {
+    console.log('SAVING PROJECT', project);
+  }
+
+  deleteProject(project) {
+    this.projectsService.delete(project.id)
+      .subscribe(result => this.getProjects());
   }
 
   cancel() {
-    this.selectProject(null);
+    this.resetProject();
   }
 
 }
